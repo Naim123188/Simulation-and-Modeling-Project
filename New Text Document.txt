@@ -1,0 +1,84 @@
+function scientificCalculatorGUI()
+    % Create the figure for the calculator
+    fig = figure('Name', 'Scientific Calculator', 'NumberTitle', 'off', ...
+                 'Position', [500, 200, 400, 500], 'Resize', 'off', ...
+                 'Color', [0.5, 0, 0.5]); % Purple background
+    
+    % Create the display for input and output
+    calcDisplay = uicontrol('Style', 'edit', 'FontSize', 14, ...
+                            'HorizontalAlignment', 'right', ...
+                            'BackgroundColor', [0.7, 0.8, 1], ... % Light blue
+                            'Position', [20, 430, 360, 40], ...
+                            'String', '');
+    
+    % Button labels for numbers, basic, and scientific operations
+    btnLabels = {'7', '8', '9', '/', 'sin', ...
+                 '4', '5', '6', '*', 'cos', ...
+                 '1', '2', '3', '-', 'tan', ...
+                 'C', '0', '=', '+', '.', ...
+                 'sqrt', 'x^2', '(', ')', 'pi'};
+             
+    % Define button positions dynamically
+    btnX = 20; btnY = 350; btnW = 70; btnH = 50; spacing = 10;
+    
+    % Add buttons dynamically
+    for i = 1:length(btnLabels)
+        uicontrol('Style', 'pushbutton', 'String', btnLabels{i}, ...
+                  'FontSize', 12, 'Position', [btnX, btnY, btnW, btnH], ...
+                  'BackgroundColor', [0.8, 0.7, 0.9], ... % Purple button color
+                  'ForegroundColor', 'white', ...
+                  'Callback', @(src, event) buttonCallback(src, calcDisplay));
+        
+        % Update button positions
+        btnX = btnX + btnW + spacing;
+        if mod(i, 5) == 0  % Move to the next row after every 5 buttons
+            btnX = 20;
+            btnY = btnY - btnH - spacing;
+        end
+    end
+end
+
+function buttonCallback(src, calcDisplay)
+    % Button callback function to handle button presses
+    btnValue = src.String;  % Get button value
+    currentText = calcDisplay.String;  % Get current text
+    
+    % Change button color to blue temporarily
+    originalColor = src.BackgroundColor;
+    src.BackgroundColor = [0, 0.4, 1]; % Blue
+    pause(0.1);
+    src.BackgroundColor = originalColor;
+    
+    % Handle operations
+    if strcmp(btnValue, 'C')
+        % Clear the display
+        calcDisplay.String = '';
+    elseif strcmp(btnValue, '=')
+        % Evaluate the expression
+        try
+            % Replace 'pi' with its numeric value and evaluate
+            expression = strrep(currentText, 'pi', num2str(pi));
+            result = eval(expression);  % Evaluate using MATLAB's eval
+            calcDisplay.String = num2str(result);
+        catch
+            calcDisplay.String = 'Error';
+        end
+    elseif strcmp(btnValue, 'pi')
+        % Add the value of pi to the display
+        calcDisplay.String = [currentText 'pi'];
+    elseif strcmp(btnValue, 'x^2')
+        % Add square operation to the display
+        calcDisplay.String = [currentText '^2'];
+    elseif ismember(btnValue, {'sin', 'cos', 'tan', 'sqrt'})
+        % Add function with parentheses
+        calcDisplay.String = [currentText btnValue '('];
+    elseif strcmp(btnValue, '.')
+        % Add decimal point
+        if ~contains(currentText, '.')
+            calcDisplay.String = [currentText '.'];
+        end
+    else
+        % Append the button value to the display
+        calcDisplay.String = [currentText btnValue];
+    end
+end
